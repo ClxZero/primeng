@@ -25,16 +25,16 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
     OTHER DEALINGS IN THE SOFTWARE.
 */
-import {NgModule,Component,ElementRef,OnInit,Input,forwardRef,Output,EventEmitter,ViewChild,ChangeDetectionStrategy, ViewEncapsulation, ChangeDetectorRef} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {DomHandler} from 'primeng/dom';
-import {InputTextModule} from 'primeng/inputtext';
-import {NG_VALUE_ACCESSOR, ControlValueAccessor} from '@angular/forms';
+import { NgModule, Component, ElementRef, OnInit, OnDestroy, Input, forwardRef, Output, EventEmitter, ViewChild, ChangeDetectionStrategy, ViewEncapsulation, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { DomHandler } from 'primeng/dom';
+import { InputTextModule } from 'primeng/inputtext';
+import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 export const INPUTMASK_VALUE_ACCESSOR: any = {
-  provide: NG_VALUE_ACCESSOR,
-  useExisting: forwardRef(() => InputMask),
-  multi: true
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => InputMask),
+    multi: true
 };
 
 @Component({
@@ -155,12 +155,13 @@ export class InputMask implements OnInit,ControlValueAccessor {
 
     focused: boolean;
 
-    constructor(public el: ElementRef, private cd: ChangeDetectorRef) {}
+    constructor(public el: ElementRef, private cd: ChangeDetectorRef, @Inject(PLATFORM_ID) private platformId: Object) {}
 
     ngOnInit() {
-        let ua = DomHandler.getUserAgent();
-        this.androidChrome = /chrome/i.test(ua) && /android/i.test(ua);
-
+        if (isPlatformBrowser(this.platformId)) {
+            let ua = DomHandler.getUserAgent();
+            this.androidChrome = /chrome/i.test(ua) && /android/i.test(ua);
+        }
         this.initMask();
     }
 
@@ -168,7 +169,7 @@ export class InputMask implements OnInit,ControlValueAccessor {
         return this._mask;
     }
 
-    set mask(val:string) {
+    set mask(val: string) {
         this._mask = val;
 
         this.initMask();
@@ -196,10 +197,10 @@ export class InputMask implements OnInit,ControlValueAccessor {
 			}
             else if (this.defs[c]) {
 				this.tests.push(new RegExp(this.defs[c]));
-				if (this.firstNonMaskPos === null) {
-	                this.firstNonMaskPos = this.tests.length - 1;
-				}
-                if (i < this.partialPosition){
+                if (this.firstNonMaskPos === null) {
+                    this.firstNonMaskPos = this.tests.length - 1;
+                }
+                if (i < this.partialPosition) {
                     this.lastRequiredNonMaskPos = this.tests.length - 1;
                 }
 			}
@@ -414,7 +415,10 @@ export class InputMask implements OnInit,ControlValueAccessor {
             pos,
             begin,
             end;
-        let iPhone = /iphone/i.test(DomHandler.getUserAgent());
+            let iPhone = false;
+            if (isPlatformBrowser(this.platformId)) {
+                let iPhone = /iphone/i.test(DomHandler.getUserAgent());
+            }
         this.oldVal = this.inputViewChild.nativeElement.value;
 
         this.onKeydown.emit(e);
@@ -480,13 +484,13 @@ export class InputMask implements OnInit,ControlValueAccessor {
                     this.writeBuffer();
                     next = this.seekNext(p);
 
-                    if (/android/i.test(DomHandler.getUserAgent())) {
+                    if (isPlatformBrowser(this.platformId) && /android/i.test(DomHandler.getUserAgent())) {
                         //Path for CSP Violation on FireFox OS 1.1
                         let proxy = () => {
                             this.caret(next);
                         };
 
-                        setTimeout(proxy,0);
+                        setTimeout(proxy, 0);
                     }
                     else {
                         this.caret(next);
