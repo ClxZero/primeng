@@ -304,7 +304,7 @@ export class AutoComplete implements AfterViewChecked,AfterContentInit,OnDestroy
 
     inputValue: string = null;
 
-    constructor(public el: ElementRef, public renderer: Renderer2, public cd: ChangeDetectorRef, public differs: IterableDiffers, public config: PrimeNGConfig, @Inject(PLATFORM_ID) private platformId: Object) {
+    constructor(public el: ElementRef, public renderer: Renderer2, public cd: ChangeDetectorRef, public differs: IterableDiffers, public config: PrimeNGConfig,  public overlayService: OverlayService, @Inject(PLATFORM_ID) private platformId: Object) {
         this.differ = differs.find([]).create(null);
         this.listId = UniqueComponentId() + '_list';
     }
